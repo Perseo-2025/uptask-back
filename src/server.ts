@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import { corsConfig } from './config/cors'
 import {connectDB} from './config/db'
 import projectRouter from './router/project.router'
+import authRouter from './router/auth.router'
 
 dotenv.config()
 
@@ -18,5 +19,6 @@ app.use(morgan('dev')) //<- leer los datos del formulario
 app.use(express.json()); //<-ojo activar para recibir json
 
 app.use('/api', projectRouter)
+app.use('/api/auth', authRouter)
 
 export default app;

@@ -15,6 +15,16 @@ router.post('/register',
     body('name').not().isEmpty().withMessage('El nombre es obligatorio'),
     body('last_name').not().isEmpty().withMessage('El apellido es obligatorio'),
     handleErrors,
-    UserController.register)
+    UserController.register
+)
+
+router.post('/confirmation-account',
+    body('token').not().isEmpty().withMessage('El token es obligatorio'),
+    handleErrors,
+    UserController.confirmationAccount
+)
+
+
+
 
 export default router

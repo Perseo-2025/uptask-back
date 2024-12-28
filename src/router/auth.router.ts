@@ -5,6 +5,7 @@ import { body } from 'express-validator'
 
 const router = Router()
 
+// register
 router.post('/register', 
     body('email').isEmail().withMessage('El email es obligatorio'),
     body('password').isLength({min:8}).not().isEmpty().withMessage('El password es obligatorio'),
@@ -24,6 +25,19 @@ router.post('/confirmation-account',
     UserController.confirmationAccount
 )
 
+//login
+router.post('/login',
+    body('email').isEmail().withMessage('El email es obligatorio'),
+    body('password').notEmpty().withMessage('El password es obligatorio'),
+    handleErrors,
+    UserController.login
+)
+
+router.post('/reset-token',
+    body('email').isEmail().withMessage('El email es obligatorio'),
+    handleErrors,
+    UserController.requestConfirmationAccount
+)
 
 
 

@@ -136,7 +136,7 @@ export class UserController {
       });
 
       await Promise.allSettled([user.save(), token.save()]);
-      res.send("Se ebvió un nuevo token a tu email");
+      res.send("Se envió un nuevo token a tu email");
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

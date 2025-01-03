@@ -5,11 +5,16 @@ import { handleErrors } from '../middleware/validation'
 import { TaskController } from '../controllers/TaskController'
 import { validateProjectExists } from '../middleware/project'
 import { taskBelongToProject, tasktExists } from '../middleware/task'
+import { authenticateToken } from '../middleware/auth'
 
 //ojo-> una tarea tiene un proyecto y un proyecto tiene muchas tareas!!!
 const router = Router()
+//como cada ruta necesita estar autenticada, usaremos el middleware globalmentede autenticación
 
-router.post('/dashboard/projects', 
+/*Cuando agregas router.use('/api', authenticateToken), todos los endpoints que comiencen con /api estarán protegidos por el middleware authenticateToken. Sin embargo, en el código que compartiste, ninguno de tus endpoints parece comenzar con /api. Por lo tanto, este middleware global no afecta tus rutas actuales.*/
+router.use('/dashboard',authenticateToken) //<-protege todos los endpoint que usen router
+
+router.post('/dashboard/projects',
     body('projectName').not().isEmpty().withMessage('El nombre del proyecto es obligatorio'),
     body('clientName').not().isEmpty().withMessage('El nombre del cliente es obligatorio'),
     body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
@@ -21,7 +26,7 @@ router.get('/dashboard/projects',
     ProjectController.getAllProject
 )
 
-router.get('/dashboard/projects/:id', 
+router.get('/dashboard/projects/:id',
     param('id').not().isEmpty().withMessage('El id es obligatorio'),
     handleErrors,
     ProjectController.getProjectById

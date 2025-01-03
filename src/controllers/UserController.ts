@@ -4,6 +4,7 @@ import { checkPassword, hashPassword } from "../utils/bcrypt";
 import Token from "../model/Token";
 import { generateToken } from "../utils/token";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
 
 export class UserController {
   static register = async (req: Request, res: Response) => {
@@ -98,7 +99,10 @@ export class UserController {
             return
         }
 
-        res.send('Inicio de sesión Exitoso')
+        const tokencookies = generateJWT({id:user.id})
+
+        res.send(tokencookies)
+
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

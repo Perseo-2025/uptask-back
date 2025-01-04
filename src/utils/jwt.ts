@@ -6,7 +6,7 @@ type UserPyload = {
 }
 
 export const generateJWT = (payload: UserPyload) => {
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5m' })
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' }) //video 562
     return token
     //consejo: guardar el token en una cookie,
     //para que el usuario no tenga que volver a ingresar sus datos

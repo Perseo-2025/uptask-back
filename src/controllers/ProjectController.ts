@@ -11,7 +11,8 @@ export class ProjectController {
       //traer los projectos del usuario autenticado
       const project = await Project.find({
           $or:[
-            {manager: {$in: req.user.id}}
+            {manager: {$in: req.user.id}},//SE OBTIENE SI TU ERES EL MANAGER DEL PROYECTO
+            {team: {$in: req.user.id}} //si eres miembro o parte del equipo
           ]
       })
       resp.json(project);
@@ -56,8 +57,8 @@ export class ProjectController {
         return
       }
 
-      //revisar si el proyecto pertenece al manager
-      if(project.manager.toString() !== req.user.id.toString() ){
+      //revisar si el proyecto pertenece al manager 
+      if(project.manager.toString() !== req.user.id.toString() && !project.team.includes(req.user.id) ){
         const error = new Error('No se relacionan')
         res.status(404).json({error: error.message})
         return

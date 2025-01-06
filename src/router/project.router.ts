@@ -107,10 +107,10 @@ router.get('/dashboard/:projectId/team',
     TeamMemberController.getAllTeamMember
 )
 
-router.delete('/dashboard/:projectId/team',
-    body('id').isMongoId().withMessage('ID no válido'),
+router.delete('/dashboard/:projectId/team/:userId',
+    param('userId').isMongoId().withMessage('ID no válido'),
     handleErrors,
-    TeamMemberController.removeTeamMember
+    TeamMemberController.removeMemberById
 )
 
 export default router;

@@ -33,7 +33,9 @@ export class TaskController {
     static getTaskById = async(req:Request, res:Response) => {
         try {
             //validato por el middleware por eso estáreducido
-            res.json(req.task);
+            const task = await Task.findById(req.params.taskId)
+                                .populate({path: 'completedBy.user', select: 'id name email'})
+            res.json(task);
         } catch (error) {
             res.json(500).json({error: error.message})
         }
@@ -67,6 +69,8 @@ export class TaskController {
         try {
             const {status} = req.body
             req.task.status = status
+            const data = {user: req.user.id, status}
+            req.task.completedBy.push(data)
             await req.task.save()
             res.send('Estado de la tarea actualizado')
         } catch (error) {

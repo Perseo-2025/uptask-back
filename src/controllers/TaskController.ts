@@ -34,7 +34,8 @@ export class TaskController {
         try {
             //validato por el middleware por eso estáreducido
             const task = await Task.findById(req.params.taskId)
-                                .populate({path: 'completedBy.user', select: 'id name email'})
+                                .populate({path: 'completedBy.user', select: 'id name email'}) //trayendo información del usuario
+                                .populate({path: 'notes', populate: {path: 'createdBy', select: 'id name email'}}) //trayendo las notas
             res.json(task);
         } catch (error) {
             res.json(500).json({error: error.message})

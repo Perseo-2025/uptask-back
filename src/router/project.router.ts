@@ -7,6 +7,7 @@ import { validateProjectExists } from '../middleware/project'
 import { hasAuthorization, taskBelongToProject, tasktExists } from '../middleware/task'
 import { authenticateToken } from '../middleware/auth'
 import { TeamMemberController } from '../controllers/TeamMenmberController'
+import { NoteController } from '../controllers/NoteController'
 
 //ojo-> una tarea tiene un proyecto y un proyecto tiene muchas tareas!!!
 const router = Router()
@@ -115,5 +116,23 @@ router.delete('/dashboard/:projectId/team/:userId',
     handleErrors,
     TeamMemberController.removeMemberById
 )
+
+/*----- Rutas para las notas -----*/
+router.post('/dashboard/projects/:projectId/tasks/:taskId/notes',
+    body('content').notEmpty().withMessage('El contenido de la nota es obligatorio'),
+    handleErrors,
+    NoteController.createNote
+)
+
+router.get('/dashboard/projects/:projectId/tasks/:taskId/notes',
+    NoteController.getTaskNotes
+)
+
+router.delete('/dashboard/projects/:projectId/tasks/:taskId/notes/:noteId',
+    param('noteId').isMongoId().withMessage('El id de la nota es obligatorio'),
+    handleErrors,
+    NoteController.deleteNote
+)
+
 
 export default router;

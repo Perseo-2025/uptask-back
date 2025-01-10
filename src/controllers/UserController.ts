@@ -55,7 +55,7 @@ export class UserController {
       }
       const user = await User.findById(tokenExists.user);
       user.confirmed = true;
-      
+
       await Promise.allSettled([user.save(), tokenExists.deleteOne()]);
 
       res.send("Cuenta confirmada correctamente");
@@ -66,48 +66,51 @@ export class UserController {
 
   static login = async (req: Request, res: Response) => {
     try {
-        const {email, password} = req.body
-        const user = await User.findOne({email})
-        if (!user) {
-            const error = new Error("El usuario no existe");
-            res.status(401).json({ error: error.message });
-            return;
-        }
-        if (!user.confirmed) {
-            const token = new Token();
-            token.user = user.id;
-            token.token = generateToken();
-            await token.save();
-    
-            //enviar correo
-            AuthEmail.sendConfirmationEmail({
-              email: user.email,
-              name: user.name,
-              token: token.token,
-            });
-    
-            const error = new Error("La cuenta no ha sido confirmada, hemos enviado un email de confirmación");
-            res.status(404).json({ error: error.message });
-            return;
-        }
-        //Revisar password
-        const isPasswordConfirmedCorrect = await checkPassword(password, user.password)
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) {
+        const error = new Error("El usuario no existe");
+        res.status(401).json({ error: error.message });
+        return;
+      }
+      if (!user.confirmed) {
+        const token = new Token();
+        token.user = user.id;
+        token.token = generateToken();
+        await token.save();
 
-        if(!isPasswordConfirmedCorrect){
-            const error = new Error('Password Incorrecto')    
-            res.status(401).json({ error: error.message });
-            return
-        }
+        //enviar correo
+        AuthEmail.sendConfirmationEmail({
+          email: user.email,
+          name: user.name,
+          token: token.token,
+        });
 
-        const tokencookies = generateJWT({id:user.id})
+        const error = new Error(
+          "La cuenta no ha sido confirmada, hemos enviado un email de confirmación"
+        );
+        res.status(404).json({ error: error.message });
+        return;
+      }
+      //Revisar password
+      const isPasswordConfirmedCorrect = await checkPassword(
+        password,
+        user.password
+      );
 
-        res.send(tokencookies)
+      if (!isPasswordConfirmedCorrect) {
+        const error = new Error("Password Incorrecto");
+        res.status(401).json({ error: error.message });
+        return;
+      }
 
+      const tokencookies = generateJWT({ id: user.id });
+
+      res.send(tokencookies);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   };
-
 
   static requestConfirmationAccount = async (req: Request, res: Response) => {
     try {
@@ -121,7 +124,7 @@ export class UserController {
         return;
       }
 
-      if(user.confirmed){
+      if (user.confirmed) {
         const error = new Error("El usuario ya está confirmado");
         res.status(403).json({ error: error.message });
         return;
@@ -146,7 +149,7 @@ export class UserController {
     }
   };
 
-  static changePassword = async(req:Request, res:Response) => {
+  static changePassword = async (req: Request, res: Response) => {
     //ir para la clase authemail
     try {
       const { email } = req.body;
@@ -158,23 +161,25 @@ export class UserController {
         return;
       }
       //Generar el token
-      const token = new Token()
-      token.token = generateToken()
-      token.user = user.id
-      await token.save()
+      const token = new Token();
+      token.token = generateToken();
+      token.user = user.id;
+      await token.save();
 
-      //enviar correo 
+      //enviar correo
       AuthEmail.sendPasswordResetToken({
         email: user.email,
         name: user.name,
         token: token.token,
       });
 
-      res.send("Revisa tu email y sigue las instrucciones para cambiar tu contraseña");
+      res.send(
+        "Revisa tu email y sigue las instrucciones para cambiar tu contraseña"
+      );
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  };
 
   static validatedToken = async (req: Request, res: Response) => {
     try {
@@ -214,7 +219,49 @@ export class UserController {
   };
 
   static user = async (req: Request, res: Response) => {
-    res.json(req.user)
-    return
+    res.json(req.user);
+    return;
   };
+
+  static updateProfile = async (req: Request, res: Response) => {
+    const { name, email } = req.body;
+    const userExits = await User.findOne({ email });
+    if (userExits && userExits.id.toString() !== req.user.id.toString()) {
+      const error = new Error("El email ya está en uso");
+      res.status(409).json({ error: error.message });
+      return;
+    }
+
+    req.user.name = name;
+    req.user.email = email;
+
+    try {
+      await req.user.save();
+      res.send("Perfil actualizado correctamente");
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  static updatePasswordProfile = async (req: Request, res: Response) => {
+      const { current_password, password } = req.body
+
+      const user = await User.findById(req.user.id)
+      
+      const isPasswordCorrect = await checkPassword(current_password, user.password)
+
+      if(!isPasswordCorrect){
+        const error = new Error('El password actual es incorrecto')
+        res.status(401).json({error: error.message})
+        return
+      }
+
+      user.password = await hashPassword(password)
+      try {
+        await user.save()
+        res.send('Password actualizado correctamente')
+      } catch (error) {
+          res.status(500).send('Hubo un error')
+      }
+  }
 }

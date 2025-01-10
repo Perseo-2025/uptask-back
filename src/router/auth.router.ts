@@ -68,4 +68,26 @@ router.get('/perfil/user',
     UserController.user
 )
 
+/* Perfil */
+router.put('/profile',
+    authenticateToken,
+    body( 'name').not().isEmpty().withMessage('El nombre es obligatorio'),
+    body('email').isEmail().withMessage('El email es obligatorio'),
+    UserController.updateProfile
+)
+
+router.post('/profile/update-password',
+    authenticateToken,
+    body('current_password').not().isEmpty().withMessage('La contraseña actual es obligatoria'), //<-password actual
+    body('password').isLength({min:8}).not().isEmpty().withMessage('El password es obligatorio'),
+    body('password_confirmation').custom((value, {req}) => {
+        if (value !== req.body.password) throw new Error('Las contraseñas no coinciden')
+        return true        
+    }),
+    handleErrors,
+    UserController.updatePasswordProfile
+
+)
+
+
 export default router

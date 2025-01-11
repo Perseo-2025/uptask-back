@@ -71,55 +71,23 @@ export class ProjectController {
   }
 
   static updateProject = async(req: Request, res: Response) => {
-    const {id} = req.params
+
     try {
-      const project = await Project.findById(id)
-      if(!project){
-        res.status(404).send("No existe el proyecto");
-      } 
-
-      //revisar si el proyecto pertenece al manager
-      if(project.manager.toString() !== req.user.id.toString() ){
-        const error = new Error('Solo el manage puede actualizar su proyecto')
-        res.status(404).json({error: error.message})
-        return
-      }
-
-      project.clientName = req.body.clientName
-      project.projectName = req.body.projectName
-      project.description = req.body.description
-
-      await project.save();
-      res.json({"message": "Proyecto actualizado", project});
+      req.project.clientName = req.body.clientName
+      req.project.projectName = req.body.projectName
+      req.project.description = req.body.description
+      await req.project.save();
+      res.send("Proyecto actualizado correctamente");
     } catch (error) {
       console.log(error);
     }
   }
 
   static deleteProject = async(req: Request, res: Response) => {
-    const {id} = req.params
+    
     try {
-      const project = await Project.findByIdAndDelete(id)
-
-      //revisar si el proyecto pertenece al manager
-      if(project.manager.toString() !== req.user.id.toString() ){
-        const error = new Error('No se relacionan')
-        res.status(404).json({error: error.message})
-        return
-      }
-      
-      if(!project){
-        res.status(404).send("No existe el proyecto");
-      } 
-
-      //revisar si el proyecto pertenece al manager
-      if(project.manager.toString() !== req.user.id.toString() ){
-        const error = new Error('Solo el manager puede eliminar su proyecto')
-        res.status(404).json({error: error.message})
-        return
-      }
-
-      res.json({"message": "Proyecto Eliminado correctamente", project});
+      await req.project.deleteOne()
+      res.send("Proyecto eliminado correctamente");
     } catch (error) {
       console.log(error);
     }

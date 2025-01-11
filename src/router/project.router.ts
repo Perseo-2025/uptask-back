@@ -29,25 +29,31 @@ router.get('/dashboard/projects',
 )
 
 router.get('/dashboard/projects/:id',
-    param('id').not().isEmpty().withMessage('El id es obligatorio'),
+    param('id').isMongoId().withMessage('El id es obligatorio'),
     handleErrors,
     ProjectController.getProjectById
-);
+)
 
-router.put('/dashboard/projects/:id',
-    param('id').not().isEmpty().withMessage('El id es obligatorio'),
-handleErrors,
-    ProjectController.updateProject
-);
+router.param('projectId', validateProjectExists)
 
-router.delete('/dashboard/projects/:id',
-    param('id').not().isEmpty().withMessage('El id es obligatorio'),
+router.put('/dashboard/projects/:projectId',
+    param('projectId').isMongoId().withMessage('El id es obligatorio'),
+    body('projectName').not().isEmpty().withMessage('El nombre del proyecto es obligatorio'),
+    body('clientName').not().isEmpty().withMessage('El nombre del cliente es obligatorio'),
+    body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
     handleErrors,
+    hasAuthorization,
+    ProjectController.updateProject
+)
+
+router.delete('/dashboard/projects/:projectId',
+    param('projectId').isMongoId().withMessage('El id es obligatorio'),
+    handleErrors,
+    hasAuthorization,
     ProjectController.deleteProject
-);
+)
 
 /* Routes for task */
-router.param('projectId', validateProjectExists)
 router.param('taskId', tasktExists)
 router.param('taskId', taskBelongToProject)
 

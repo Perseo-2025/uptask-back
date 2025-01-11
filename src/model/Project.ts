@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, PopulatedDoc, Types } from "mongoose";
-import { ITask } from "./Task";
+import Task, { ITask } from "./Task";
 import { IUser } from "./User";
+import Note from "./Note";
 
 
 //Un proyecto tiene muchas tareas
@@ -54,6 +55,22 @@ const ProjectSchema:Schema = new Schema({
         }
     ],
 }, {timestamps: true})
+
+
+// Middleware
+// Elimina las 
+ProjectSchema.pre('deleteOne', {document: true}, async function() {
+    const projectId = this._id
+    if(!projectId) return 
+
+    const tasks = await Task.find({project: projectId})
+    for(const task of tasks){
+        await Note.deleteMany({task: task._id})
+    }
+
+    await Task.deleteMany({project: projectId})
+    console.log(this._id)
+})
 
 const Project = mongoose.model<IProject>('Project', ProjectSchema);
 export default Project;

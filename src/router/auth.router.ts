@@ -89,5 +89,12 @@ router.post('/profile/update-password',
 
 )
 
+router.post('/check-password', // verifica si quiere eliminar su password
+    authenticateToken,
+    body('password').not().isEmpty().withMessage('La contraseña actual es obligatoria'),
+    handleErrors,
+    UserController.checkPasswordProfile
+)
+
 
 export default router

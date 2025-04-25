@@ -23,7 +23,7 @@ Backend del proyecto **Uptask**, una aplicación para gestionar tareas (To-Do Li
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/tuusuario/uptask-back.git
+git clone https://github.com/Perseo-2025/uptask-back.git
 cd uptask-back
 ````
 # Dependencias
